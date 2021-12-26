@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SysUserRoleDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SysUserRole">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="role_id" jdbcType="VARCHAR" property="roleId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+
+  <!-- 查询用户拥有的角色数据接口 -->
+  <select id="getRoleIdsByUserId" resultType="java.lang.String" parameterType="string">
+    select role_id
+    from sys_user_role
+    where user_id=#{userId}
+  </select>
+
+  <!-- 根据用户id 删除用户拥有的角色数据 -->
+  <delete id="removeRoleIdsByUserId" parameterType="string">
+    delete
+    from sys_user_role
+    where user_id=#{userId}
+  </delete>
+
+  <!-- 批量插入用户角色数据 -->
+  <insert id="batchInsertUserRole" parameterType="com.house.pojo.SysUserRole">
+    insert into sys_user_role
+    (id, user_id, role_id, create_time)
+    values
+    <foreach collection="list" item="item" index="index" separator=",">
+      (
+        #{item.id},
+        #{item.userId},
+        #{item.roleId},
+        #{item.createTime}
+      )
+    </foreach>
+  </insert>
+
+  <!-- 通过角色 id 集合查询所有的用户 id -->
+  <select id="getUserIdsByRoleIds" resultType="java.lang.String">
+    select user_id
+    from sys_user_role
+    where role_id in
+    <foreach collection="list" open="(" close=")" separator="," item="item">
+      #{item}
+    </foreach>
+  </select>
+
+  <!-- 通过 单个角色id 查询所有的用户ids -->
+  <select id="getUserIdsByRoleId" resultType="java.lang.String" parameterType="string">
+    select user_id
+    from sys_user_role
+    where role_id=#{roleId}
+  </select>
+
+  <!-- 通过角色id删除用户id -->
+  <delete id="removeUseIdsrRoleId" parameterType="string">
+    delete
+    from sys_user_role
+    where role_id=#{roleId}
+  </delete>
+
+  <!-- 通过用户id获取该用户所拥有的角色名称（用户登录时查询拥有角色） -->
+  <select id="getRoleNameByUserId" resultType="java.lang.String" parameterType="string">
+    select sr.name
+    from sys_user_role sur
+    left join sys_role sr on sr.id=sur.role_id
+    where sur.user_id=#{userId} and sr.name != ''
+  </select>
+
+  <!-- 通过用户id获取该用户所拥有的权限授权 如：sys:user:add -->
+  <select id="getPermissionPermsByUserId" resultType="java.lang.String" parameterType="string">
+    select sp.perms
+    from sys_user_role sur
+    left join sys_role sr on sr.id=sur.role_id
+    left join sys_role_permission srp on srp.role_id=sr.id
+    left join sys_permission sp on sp.id=srp.permission_id
+    where sur.user_id=#{userId} and sp.perms != ''
+  </select>
+
+  <!--查询前端按钮权限-->
+  <select id="getPermissionCodesByUserId" resultType="java.lang.String" parameterType="string">
+    select sp.code
+    from sys_user_role sur
+    left join sys_role sr on sr.id=sur.role_id
+    left join sys_role_permission srp on srp.role_id=sr.id
+    left join sys_permission sp on sp.id=srp.permission_id
+    where sur.user_id=#{userId} and sp.perms != ''
+  </select>
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SysPermissionDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SysPermission">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="icon" jdbcType="VARCHAR" property="icon" />
+    <result column="perms" jdbcType="VARCHAR" property="perms" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="method" jdbcType="VARCHAR" property="method" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="pid" jdbcType="VARCHAR" property="pid" />
+    <result column="order_num" jdbcType="INTEGER" property="orderNum" />
+    <result column="type" jdbcType="TINYINT" property="type" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="deleted" jdbcType="TINYINT" property="deleted" />
+  </resultMap>
+
+  <!--新增菜单权限-->
+  <insert id="insertPermissionInfo" parameterType="com.house.pojo.SysPermission">
+    insert into sys_permission
+    (id, code, `title`, icon, perms, url, `method`, `name`, pid, order_num,
+    `type`, `status`, create_time, update_time, deleted)
+    values
+    (#{id}, #{code}, #{title}, #{icon}, #{perms}, #{url}, #{method}, #{name}, #{pid}, #{orderNum},
+    #{type}, #{status}, #{createTime}, #{updateTime}, #{deleted})
+  </insert>
+
+  <!-- 更新权限菜单数据 -->
+  <update id="updateByPrimaryKeySelective" parameterType="SysPermission">
+    update sys_permission
+    <set>
+      <if test="code != null and code != ''">
+        code = #{code,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null and title != ''">
+        `title` = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="icon != null and icon != ''">
+        icon = #{icon,jdbcType=VARCHAR},
+      </if>
+      <if test="perms != null and perms != ''">
+        perms = #{perms,jdbcType=VARCHAR},
+      </if>
+      <if test="url != null and url != ''">
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="method != null and method != ''">
+        `method` = #{method,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null and name != ''">
+        `name` = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="pid != null and pid != ''">
+        pid = #{pid,jdbcType=VARCHAR},
+      </if>
+      <if test="orderNum != null">
+        order_num = #{orderNum,jdbcType=INTEGER},
+      </if>
+      <if test="type != null">
+        `type` = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="status != null">
+        `status` = #{status,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null">
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="deleted != null">
+        deleted = #{deleted,jdbcType=TINYINT},
+      </if>
+    </set>
+    where id=#{id}
+  </update>
+
+  <!--校验菜单id-->
+  <select id="selectByPrimaryKey" resultType="SysPermission" parameterType="string">
+    select *
+    from sys_permission
+    where id=#{permissionId} and deleted=1 LIMIT 1
+  </select>
+
+  <!-- 查询所有的菜单权限数据 -->
+  <select id="selectAll" resultType="SysPermission">
+    select *
+    from sys_permission
+    where deleted=1
+    order by order_num desc
+  </select>
+
+  <!--通过用户id查询用户拥有的权限-->
+  <select id="getPermissionByUserId" resultType="SysPermission" parameterType="string">
+    select *
+    from sys_permission sp
+    left join sys_role_permission srp on sp.id = srp.permission_id
+    left join sys_user_role sur on sur.role_id = srp.role_id
+    where sur.user_id=#{userId}
+    order by sp.order_num desc
+  </select>
+
+  <!-- 通过 id 查询是否有子级 -->
+  <select id="selectChild" resultType="int" parameterType="string">
+    select count(1)
+    from sys_permission
+    where pid=#{id} and deleted=1
+  </select>
+</mapper>

@@ -1,0 +1,74 @@
+## swagger2配置
+swagger2.enable=true
+
+## JWT配置
+jwt.secretKey=aaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+jwt.accessTokenExpireTime=PT2H
+jwt.refreshTokenExpireTime=PT8H
+jwt.refreshTokenExpireAppTime=P30D
+jwt.issuer=test
+
+## log配置
+logging.level.root=INFO
+logging.level.com.house.dao=INFO
+
+## redis配置
+# Redis数据库索引（默认为0）
+spring.redis.database=1
+# Redis服务器地址
+spring.redis.host=127.0.0.1
+# Redis服务器连接端口（默认为6379）
+spring.redis.port=6379
+# Redis服务器连接密码（默认为空）
+spring.redis.password=
+# 连接池最大连接数（使用负值表示没有限制）
+spring.redis.lettuce.pool.max-active=100
+# 连接池最大阻塞等待时间（使用负值表示没有限制）
+spring.redis.lettuce.pool.max-wait=PT10S
+# 连接池中的最大空闲连接
+spring.redis.lettuce.pool.max-idle=30
+# 连接池中的最小空闲连接
+spring.redis.lettuce.pool.min-idle=1
+# 连接超时时间（毫秒）
+spring.redis.timeout=PT10S
+
+
+## druid配置
+spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+spring.datasource.druid.driver-class-name=com.mysql.jdbc.Driver
+# allowMultiQueries=true -> 参数允许JDBC连接能够一次执行多条增删改查，假如没配这个参数的话，所有批量操作都会报错。
+# rewriteBatchedStatements=true -> mybatis批量执行需要加参数
+spring.datasource.druid.url=jdbc:mysql://127.0.0.1:3306/housedb?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&allowMultiQueries=true&rewriteBatchedStatements=true
+spring.datasource.druid.username=test
+spring.datasource.druid.password=123456
+# 初始化连接池个数
+spring.datasource.druid.initial-size=5
+# 最大连接池个数
+spring.datasource.druid.max-active=20
+# 最小连接池个数——>已经不再使用，配置了也没效果
+spring.datasource.druid.min-idle=5
+# 配置获取连接等待超时的时间，单位毫秒，缺省启用公平锁，并发效率会有所下降
+spring.datasource.druid.max-wait=60000
+# 打开PSCache，并且指定每个连接上PSCache的大小
+spring.datasource.druid.pool-prepared-statements=true
+spring.datasource.druid.max-pool-prepared-statement-per-connection-size=20
+# 用来检测连接是否有效的sql，要求是一个查询语句。
+# 如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会起作用
+spring.datasource.druid.validation-query=SELECT 1 FROM DUAL
+spring.datasource.druid.validation-query-timeout=30000
+# 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+spring.datasource.druid.test-on-borrow=false
+# 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+spring.datasource.druid.test-on-return=false
+# 建议配置为true，不影响性能，并且保证安全性。
+# 申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+spring.datasource.druid.test-while-idle=true
+# 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+spring.datasource.druid.time-between-eviction-runs-millis=60000
+# 配置一个连接在池中最小生存的时间，单位是毫秒
+spring.datasource.druid.min-evictable-idle-time-millis=300000
+# 通过别名的方式配置扩展插件，多个英文逗号分隔，常用的插件有：
+# 监控统计用的filter:stat
+# 日志用的filter:log4j
+# 防御sql注入的filter:wall
+spring.datasource.druid.filters=stat,wall

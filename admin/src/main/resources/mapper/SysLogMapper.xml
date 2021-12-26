@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SysLogDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SysLog">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="operation" jdbcType="VARCHAR" property="operation" />
+    <result column="time" jdbcType="INTEGER" property="time" />
+    <result column="method" jdbcType="VARCHAR" property="method" />
+    <result column="params" jdbcType="VARCHAR" property="params" />
+    <result column="ip" jdbcType="VARCHAR" property="ip" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+
+  <insert id="insertLogInfo" parameterType="com.house.pojo.SysLog">
+    insert into sys_log
+    (id, user_id, username, `operation`, `time`, `method`, params, ip, create_time)
+    values
+    (#{id}, #{userId}, #{username}, #{operation}, #{time}, #{method}, #{params}, #{ip}, #{createTime})
+  </insert>
+
+  <!-- 分页与条件查询所有数据 -->
+  <select id="selectAllLog" resultType="SysLog" parameterType="com.house.vo.req.LogPageReqVo">
+    select *
+    from sys_log
+    <where>
+      <if test="operation != null and operation != ''">
+        and instr(operation, #{operation}) > 0
+      </if>
+      <if test="username != null and username != ''">
+        and instr(username, #{username}) > 0
+      </if>
+      <if test="startTime != null and startTime != ''">
+        and create_time &gt;= #{startTime}
+      </if>
+      <if test="endTime != null and endTime != ''">
+        and create_time &lt;= #{endTime}
+      </if>
+    </where>
+    order by create_time desc
+  </select>
+
+  <!-- 删除日志（包括批量删除） -->
+  <delete id="batchDeletedLog">
+    delete
+    from sys_log
+    where id in
+    <foreach collection="list" open="(" close=")" separator="," item="item">
+      #{item}
+    </foreach>
+  </delete>
+
+</mapper>

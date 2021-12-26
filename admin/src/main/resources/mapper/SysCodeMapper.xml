@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SysCodeDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SysCode">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="code" jdbcType="VARCHAR" property="code" />
+    <result column="desc" jdbcType="VARCHAR" property="desc" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="value" jdbcType="VARCHAR" property="value" />
+    <result column="number" jdbcType="INTEGER" property="number" />
+  </resultMap>
+
+  <!--查询系统字典-->
+  <select id="querySysCode" resultType="com.house.vo.resp.CodeRespVo">
+  select code, `desc`, `name`, `value`, `number` from sys_code
+  </select>
+
+</mapper>

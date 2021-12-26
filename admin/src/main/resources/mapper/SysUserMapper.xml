@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SysUserDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SysUser">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="username" jdbcType="VARCHAR" property="username" />
+    <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="nick_name" jdbcType="VARCHAR" property="nickName" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
+    <result column="status" jdbcType="TINYINT" property="status" />
+    <result column="deleted" jdbcType="TINYINT" property="deleted" />
+    <result column="create_id" jdbcType="VARCHAR" property="createId" />
+    <result column="update_id" jdbcType="VARCHAR" property="updateId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="remark" jdbcType="VARCHAR" property="remark" />
+  </resultMap>
+
+  <!-- 分页查询用户信息-->
+  <select id="queryUserPageInfo" resultType="com.house.vo.resp.UserTableRespVo" parameterType="com.house.vo.req.UserPageReqVo">
+    SELECT a.id, a.username, a.nick_name, a.email, a.status, a.deleted, a.create_id, a.update_id,
+    a.create_time, a.update_time, a.remark, b.username createUserName, c.username updateUserName
+    FROM sys_user a
+    LEFT JOIN sys_user b ON b.id=a.create_id
+    LEFT JOIN sys_user c ON c.id=a.update_id
+    <where>
+      a.deleted=1
+      <if test="username != null and username != ''">
+          and instr(a.username, #{username}) > 0
+      </if>
+      <if test="nickName != null and nickName != ''">
+          and instr(a.nick_name, #{nickName}) > 0
+      </if>
+      <if test="status != null and status!=''">
+        and a.status=#{status}
+      </if>
+      <if test="startTime != null and startTime != ''">
+        and a.create_time >= #{startTime}
+      </if>
+      <if test="endTime != null and endTime != ''">
+        and a.create_time &lt;= #{endTime}
+      </if>
+    </where>
+  </select>
+
+  <!--校验用户名是否存在-->
+  <select id="checkUsername" resultType="SysUser" parameterType="string">
+    select * from sys_user where username = #{username} and deleted = 1
+  </select>
+
+  <!--新增用户信息-->
+  <insert id="insertUserInfo" parameterType="com.house.pojo.SysUser">
+    insert into sys_user
+        ( id, username, password, nick_name, email, status, deleted,
+        create_id, update_id, create_time, update_time, remark)
+    values
+        (#{id}, #{username}, #{password}, #{nickName}, #{email}, #{status}, #{deleted},
+        #{createId}, #{updateId}, #{createTime}, #{updateTime}, #{remark})
+  </insert>
+
+  <!--根据id主键查询用户信息-->
+  <select id="selectByPrimaryKey" resultType="SysUser" parameterType="string">
+    select * from sys_user where id = #{id} and deleted = 1
+  </select>
+
+  <!-- 更新用户信息 -->
+  <update id="updateUserInfo" parameterType="com.house.pojo.SysUser">
+    update sys_user
+    <set>
+        <if test="username != null and username != ''">
+          username=#{username},
+        </if>
+        <if test="password != null and password != ''">
+          `password`=#{password},
+        </if>
+        <if test="nickName != null and nickName != ''">
+          nick_name=#{nickName},
+        </if>
+        <if test="email != null and email != ''">
+          email=#{email},
+        </if>
+        <if test="status != null and status != ''">
+          `status`=#{status},
+        </if>
+        <if test="deleted != null and deleted != ''">
+          deleted=#{deleted},
+        </if>
+        <if test="createId != null and createId != ''">
+          create_id=#{createId},
+        </if>
+        <if test="updateId != null and updateId != ''">
+          update_id=#{updateId},
+        </if>
+        <if test="createTime != null">
+          create_time=#{createTime},
+        </if>
+        <if test="updateTime != null">
+          update_time=#{updateTime},
+        </if>
+        <if test="remark != null">
+          remark=#{remark},
+        </if>
+    </set>
+    where id=#{id}
+  </update>
+
+  <!-- 批量删除用户 -->
+  <update id="deletedUsers" parameterType="com.house.pojo.SysUser">
+    update sys_user
+    <set>
+      deleted=0,
+      <if test="sysUser.updateId != null and sysUser.updateId != ''">
+        update_id=#{sysUser.updateId},
+      </if>
+      <if test="sysUser.updateTime != null">
+        update_time=#{sysUser.updateTime},
+      </if>
+    </set>
+    where id in
+    <foreach collection="list" separator="," open="(" close=")" item="item">
+        #{item}
+    </foreach>
+  </update>
+</mapper>

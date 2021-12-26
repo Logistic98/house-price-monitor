@@ -1,0 +1,30 @@
+# 后端部分
+.idea
+*.iml
+target
+
+# 爬虫部分
+__pycache__
+/spider/log
+
+# 前端部分
+.vscode
+node_modules
+/monitor/package-lock.json
+
+# 不公开的文档
+/private-doc
+
+# 含敏感信息的文件
+/admin/src/main/resources/application-dev.properties
+/admin/src/main/resources/application-prod.properties
+/admin/src/main/java/com/house/utils/ScrewUtil.java
+/monitor/src/common/env.js
+/spider/lib/spider/base_spider.py
+/xxl-job-admin/src/main/resources/application.properties
+/xxl-job-executor/src/main/resources/application.properties
+
+# 项目部署
+/deploy
+
+

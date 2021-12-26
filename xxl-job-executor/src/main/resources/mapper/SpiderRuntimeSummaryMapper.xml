@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xxljob.dao.SpiderRuntimeSummaryDao">
+  <resultMap id="BaseResultMap" type="com.xxljob.pojo.SpiderRuntimeSummary">
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="method" jdbcType="VARCHAR" property="method" />
+    <result column="desc" jdbcType="VARCHAR" property="desc" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+    <result column="time_range" jdbcType="VARCHAR" property="timeRange" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.xxljob.pojo.SpiderRuntimeSummary">
+    <result column="data" jdbcType="LONGVARBINARY" property="data" />
+  </resultMap>
+
+  <sql id="daySql">
+    and SUBSTR(time,1,8) = DATE_FORMAT(NOW(),'%Y%m%d')
+  </sql>
+  <sql id="weekSql">
+    and SUBSTR(time,1,8) >DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 7 DAY),'%Y%m%d')
+    and SUBSTR(time,1,8) &lt;= DATE_FORMAT(NOW(),'%Y%m%d')
+  </sql>
+  <sql id="monthSql">
+    and SUBSTR(time,1,8) >DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 30 DAY),'%Y%m%d')
+    and SUBSTR(time,1,8) &lt;= DATE_FORMAT(NOW(),'%Y%m%d')
+  </sql>
+  <sql id="yearSql">
+    and SUBSTR(time,1,8) >DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 365 DAY),'%Y%m%d')
+    and SUBSTR(time,1,8) &lt;= DATE_FORMAT(NOW(),'%Y%m%d')
+  </sql>
+
+  <sql id="communityCommonSelectSql">
+    SELECT case when sum(sale) = '0' then '0' else round(sum(price*sale)/sum(sale),2) end avgPrice,
+    city,'community' type
+  </sql>
+  <sql id="newHouseCommonSelectSql">
+    SELECT case when count(*) = '0' then '0' else round(sum(price)/count(*),2) end avgPrice,
+    city,'new_house' type
+  </sql>
+  <sql id="rentCommonSelectSql">
+    SELECT case when count(*) = '0' then '0' else round(sum(price)/count(*),2) end avgPrice,
+    city,'rent' type
+  </sql>
+  <sql id="secondHandCommonSelectSql">
+    SELECT case when count(*) = '0' then '0' else  round(sum(price*10000/size)/count(*),2) end avgPrice,
+	city, 'second_hand' type
+  </sql>
+
+  <!--查询房源数量-->
+  <select id="queryHouseCount" resultType="com.xxljob.vo.resp.HouseCountRespVo">
+  select count(*) count,city,'community' type
+    from spider_community
+   where 1 = 1
+      <include refid="daySql"></include>
+    group by city
+  union all
+  select count(*) count,city,'new_house' type
+    from spider_new_house
+   where 1 = 1
+      <include refid="daySql"></include>
+    group by city
+  union all
+  select count(*) count,city,'rent' type
+    from spider_rent
+   where 1 = 1
+      <include refid="daySql"></include>
+   group by city
+  union all
+  select count(*) count,city,'second_hand' type
+    from spider_second_hand
+   where 1 = 1
+      <include refid="daySql"></include>
+   group by city
+  </select>
+
+  <!--查询各城市房源平均价格-->
+  <select id="queryCityAvgHousePrice" resultType="com.xxljob.vo.resp.CityAvgHousePriceRespVo">
+      <include refid="communityCommonSelectSql"></include>,'all' timeRange
+      FROM `spider_community` where price != '0' and sale != '0' group by city
+      union all
+      <include refid="communityCommonSelectSql"></include>,'week' timeRange
+      FROM `spider_community` where price != '0' and sale != '0' <include refid="weekSql"></include> group by city
+      union all
+      <include refid="communityCommonSelectSql"></include>,'month' timeRange
+      FROM `spider_community` where price != '0' and sale != '0' <include refid="monthSql"></include> group by city
+      union all
+      <include refid="communityCommonSelectSql"></include>,'year' timeRange
+      FROM `spider_community` where price != '0' and sale != '0' <include refid="yearSql"></include> group by city
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'all' timeRange
+      FROM `spider_new_house` where price != '0' group by city
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'week' timeRange
+      FROM `spider_new_house` where price != '0' <include refid="weekSql"></include> group by city
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'month' timeRange
+      FROM `spider_new_house` where price != '0' <include refid="monthSql"></include> group by city
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'year' timeRange
+      FROM `spider_new_house` where price != '0' <include refid="yearSql"></include> group by city
+      union all
+      <include refid="rentCommonSelectSql"></include>,'all' timeRange
+      FROM `spider_rent` where price != '0' group by city
+      union all
+      <include refid="rentCommonSelectSql"></include>,'week' timeRange
+      FROM `spider_rent` where price != '0' <include refid="weekSql"></include> group by city
+      union all
+      <include refid="rentCommonSelectSql"></include>,'month' timeRange
+      FROM `spider_rent` where price != '0' <include refid="monthSql"></include> group by city
+      union all
+      <include refid="rentCommonSelectSql"></include>,'year' timeRange
+      FROM `spider_rent` where price != '0' <include refid="yearSql"></include> group by city
+      union all
+      <include refid="secondHandCommonSelectSql"></include>,'all' timeRange
+      FROM `spider_second_hand` where price != '0' and size != '0' group by city
+      union all
+	  <include refid="secondHandCommonSelectSql"></include>,'week' timeRange
+      FROM `spider_second_hand` where price != '0' and size != '0' <include refid="weekSql"></include> group by city
+	  union all
+	  <include refid="secondHandCommonSelectSql"></include>,'month' timeRange
+	  FROM `spider_second_hand` where price != '0' and size != '0' <include refid="monthSql"></include> group by city
+	  union all
+	  <include refid="secondHandCommonSelectSql"></include>,'year' timeRange
+      FROM `spider_second_hand` where price != '0' and size != '0' <include refid="yearSql"></include> group by city
+  </select>
+
+  <!--查询某时限范围里房源平均价格趋势-->
+  <select id="queryTimeAvgHousePrice" resultType="com.xxljob.vo.resp.TimeAvgHousePriceRespVo">
+      <include refid="communityCommonSelectSql"></include>,'all' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_community` where price != '0' and sale != '0' group by city, date
+      union all
+      <include refid="communityCommonSelectSql"></include>,'week' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_community` where price != '0' and sale != '0' <include refid="weekSql"></include> group by city, date
+      union all
+      <include refid="communityCommonSelectSql"></include>,'month' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_community` where price != '0' and sale != '0' <include refid="monthSql"></include> group by city, date
+      union all
+      <include refid="communityCommonSelectSql"></include>,'year' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_community` where price != '0' and sale != '0' <include refid="yearSql"></include> group by city, date
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'all' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_new_house` where price != '0' group by city, date
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'week' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_new_house` where price != '0' <include refid="weekSql"></include> group by city, date
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'month' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_new_house` where price != '0' <include refid="monthSql"></include> group by city, date
+      union all
+      <include refid="newHouseCommonSelectSql"></include>,'year' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_new_house` where price != '0' <include refid="yearSql"></include> group by city, date
+      union all
+      <include refid="rentCommonSelectSql"></include>,'all' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_rent` where price != '0' group by city, date
+      union all
+      <include refid="rentCommonSelectSql"></include>,'week' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_rent` where price != '0' <include refid="weekSql"></include> group by city, date
+      union all
+      <include refid="rentCommonSelectSql"></include>,'month' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_rent` where price != '0' <include refid="monthSql"></include> group by city, date
+      union all
+      <include refid="rentCommonSelectSql"></include>,'year' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_rent` where price != '0' <include refid="yearSql"></include> group by city, date
+      union all
+      <include refid="secondHandCommonSelectSql"></include>,'all' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_second_hand` where price != '0' and size != '0' group by city, date
+      union all
+      <include refid="secondHandCommonSelectSql"></include>,'week' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_second_hand` where price != '0' and size != '0' <include refid="weekSql"></include> group by city, date
+      union all
+      <include refid="secondHandCommonSelectSql"></include>,'month' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_second_hand` where price != '0' and size != '0' <include refid="monthSql"></include> group by city, date
+      union all
+      <include refid="secondHandCommonSelectSql"></include>,'year' timeRange, SUBSTR(time,1,8) date
+      FROM `spider_second_hand` where price != '0' and size != '0' <include refid="yearSql"></include> group by city, date
+  </select>
+
+  <!--存储运行数据-->
+  <insert id="insertRuntimeSummaryData" parameterType="com.xxljob.pojo.SpiderRuntimeSummary">
+    insert into spider_runtime_summary
+        (`method`, `desc`, `data`, city, update_time, `type`, time_range)
+    values
+        (#{method}, #{desc}, #{data}, #{city}, #{updateTime}, #{type}, #{timeRange})
+  </insert>
+
+   <!--  删除指定方法的运行数据（先删后插） -->
+  <delete id="deleteRuntimeSummaryData">
+    delete from spider_runtime_summary
+     where `method` = #{method}
+  </delete>
+
+</mapper>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SysRolePermissionDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SysRolePermission">
+    <result column="id" jdbcType="VARCHAR" property="id" />
+    <result column="role_id" jdbcType="VARCHAR" property="roleId" />
+    <result column="permission_id" jdbcType="VARCHAR" property="permissionId" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+  </resultMap>
+
+  <!-- 删除 -->
+  <delete id="removeByRoleId" parameterType="string">
+    delete from sys_role_permission where role_id=#{roleId}
+  </delete>
+  <!-- 批量插入 角色 权限 id数据
+     parameterType="com.house.pojo.SysRolePermission"
+     parameterType="java.util.Map"
+     parameterType="java.util.List"
+     parameterType="java.util.Array"
+     三种方式都可以
+  -->
+  <insert id="batchRolePermission" parameterType="com.house.pojo.SysRolePermission">
+    insert into sys_role_permission
+    (id,role_id,permission_id,create_time)
+    values
+    <foreach collection="list" index="index" item="item" separator=",">
+      (
+        #{item.id},
+        #{item.roleId},
+        #{item.permissionId},
+        #{item.createTime}
+      )
+    </foreach>
+  </insert>
+
+  <!-- 通过权限 id 查询所有的角色 id -->
+  <select id="getRoleIdsByPermissionId" resultType="java.lang.String" parameterType="string">
+    select role_id
+    from sys_role_permission
+    where permission_id=#{permissionId}
+  </select>
+
+  <!-- 通过权限id删除相关角色和该菜单权限的关联表信息 -->
+  <delete id="removeByPermissionId" parameterType="string">
+    delete
+    from sys_role_permission
+    where permission_id=#{permissionId}
+  </delete>
+
+  <!-- 通过角色id查询拥有的权限id -->
+  <select id="getPermissionIdsByRoleId" resultType="java.lang.String" parameterType="string">
+    select permission_id
+    from sys_role_permission
+    where role_id=#{roleId}
+  </select>
+</mapper>

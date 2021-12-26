@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SpiderSecondHandDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SpiderSecondHand">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="date" jdbcType="VARCHAR" property="date" />
+    <result column="area" jdbcType="VARCHAR" property="area" />
+    <result column="descs" jdbcType="VARCHAR" property="descs" />
+    <result column="layout" jdbcType="VARCHAR" property="layout" />
+    <result column="size" jdbcType="VARCHAR" property="size" />
+    <result column="direction" jdbcType="VARCHAR" property="direction" />
+    <result column="furnish" jdbcType="VARCHAR" property="furnish" />
+    <result column="floor" jdbcType="VARCHAR" property="floor" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+    <result column="price" jdbcType="VARCHAR" property="price" />
+    <result column="district" jdbcType="VARCHAR" property="district" />
+    <result column="time" jdbcType="VARCHAR" property="time" />
+    <result column="source" jdbcType="VARCHAR" property="source" />
+  </resultMap>
+
+  <!--根据条件查询二手房信息-->
+  <select id="querySecondHand" resultType="com.house.vo.resp.SecondHandRespVo" parameterType="com.house.vo.req.SecondHandReqVo">
+    select city, area, descs, layout, concat(size, '平米') size, direction, furnish, floor, type,
+           case when price = '0' then '暂无数据' else concat(price, '万/套') end price,
+           district, date_format(`time`,'%Y-%m-%d %H:%i:%S') time, `source`
+    from spider_second_hand
+    <where>
+      1 = 1
+      <if test="city != null and city != ''">
+        and city = #{city}
+      </if>
+      <if test="district != null and district != ''">
+        and instr(district,#{district}) > 0
+      </if>
+      <if test="layout != null and layout != ''">
+        and instr(layout,#{layout}) > 0
+      </if>
+      <if test="direction != null and direction != ''">
+        and instr(direction,#{direction}) > 0
+      </if>
+      <if test="furnish != null and furnish != ''">
+        and instr(furnish,#{furnish}) > 0
+      </if>
+      <if test="startTime != null and startTime != ''">
+        and date_format(`time`,'%Y-%m-%d %H:%i:%S')  >= #{startTime}
+      </if>
+      <if test="endTime != null and endTime != ''">
+        and date_format(`time`,'%Y-%m-%d %H:%i:%S')  &lt;= #{endTime}
+      </if>
+      <if test="startPrice != null and startPrice != ''">
+        and price >= #{startPrice} + 0
+      </if>
+      <if test="endPrice != null and endPrice != ''">
+        and price &lt;= #{endPrice} + 0
+      </if>
+      <if test="startSize != null and startSize != ''">
+        and size >= #{startSize} + 0
+      </if>
+      <if test="endSize != null and endSize != ''">
+        and size &lt;= #{endSize} + 0
+      </if>
+    </where>
+    order by `time` desc
+  </select>
+
+</mapper>

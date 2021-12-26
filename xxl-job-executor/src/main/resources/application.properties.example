@@ -1,0 +1,71 @@
+## 项目启动配置
+# 服务端口
+server.port=8083
+# log配置
+logging.level.root=INFO
+logging.level.com.xxljob.dao=debug
+
+## druid配置
+spring.datasource.type=com.alibaba.druid.pool.DruidDataSource
+spring.datasource.druid.driver-class-name=com.mysql.jdbc.Driver
+# allowMultiQueries=true -> 参数允许JDBC连接能够一次执行多条增删改查，假如没配这个参数的话，所有批量操作都会报错。
+# rewriteBatchedStatements=true -> mybatis批量执行需要加参数
+spring.datasource.druid.url=jdbc:mysql://127.0.0.1:3306/housedb?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=GMT%2B8&allowMultiQueries=true&rewriteBatchedStatements=true
+spring.datasource.druid.username=test
+spring.datasource.druid.password=123456
+# 初始化连接池个数
+spring.datasource.druid.initial-size=5
+# 最大连接池个数
+spring.datasource.druid.max-active=20
+# 最小连接池个数——>已经不再使用，配置了也没效果
+spring.datasource.druid.min-idle=5
+# 配置获取连接等待超时的时间，单位毫秒，缺省启用公平锁，并发效率会有所下降
+spring.datasource.druid.max-wait=60000
+# 打开PSCache，并且指定每个连接上PSCache的大小
+spring.datasource.druid.pool-prepared-statements=true
+spring.datasource.druid.max-pool-prepared-statement-per-connection-size=20
+# 用来检测连接是否有效的sql，要求是一个查询语句。
+# 如果validationQuery为null，testOnBorrow、testOnReturn、testWhileIdle都不会起作用
+spring.datasource.druid.validation-query=SELECT 1 FROM DUAL
+spring.datasource.druid.validation-query-timeout=30000
+# 申请连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+spring.datasource.druid.test-on-borrow=false
+# 归还连接时执行validationQuery检测连接是否有效，做了这个配置会降低性能
+spring.datasource.druid.test-on-return=false
+# 建议配置为true，不影响性能，并且保证安全性。
+# 申请连接的时候检测，如果空闲时间大于timeBetweenEvictionRunsMillis，执行validationQuery检测连接是否有效。
+spring.datasource.druid.test-while-idle=true
+# 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+spring.datasource.druid.time-between-eviction-runs-millis=60000
+# 配置一个连接在池中最小生存的时间，单位是毫秒
+spring.datasource.druid.min-evictable-idle-time-millis=300000
+# 通过别名的方式配置扩展插件，多个英文逗号分隔，常用的插件有：
+# 监控统计用的filter:stat
+# 日志用的filter:log4j
+# 防御sql注入的filter:wall
+spring.datasource.druid.filters=stat,wall
+
+## mybatis配置
+# 将带有下划线的表字段映射为驼峰格式的实体类属性
+mybatis.configuration.map-underscore-to-camel-case=true
+# 指定POJO扫描包
+mybatis.type-aliases-package=com.xxljob.pojo
+# 配置为 classpath 路径下 mapper 包下，* 代表会扫描所有 xml 文件。
+mybatis.mapper-locations=classpath:mapper/*.xml
+
+## xxl-job配置
+# xxl-job admin address list, such as "http://address" or "http://address01,http://address02"
+xxl.job.admin.addresses=http://ip:8082/xxl-job-admin
+# xxl-job, access token
+xxl.job.accessToken=aaaaaaaaaa
+# xxl-job executor appname
+xxl.job.executor.appname=xxl-job-executor
+# xxl-job executor registry-address: default use address to registry , otherwise use ip:port if address is null
+xxl.job.executor.address=
+# xxl-job executor server-info
+xxl.job.executor.ip=ip
+xxl.job.executor.port=9999
+# xxl-job executor log-path
+xxl.job.executor.logpath=/data/applogs/xxl-job/jobhandler
+# xxl-job executor log-retention-days
+xxl.job.executor.logretentiondays=30
