@@ -1,0 +1,255 @@
+<template>
+    <div class="newHouse">
+        <div class="header">
+            <div class="search" style="display: inline-block" :rules="rules">
+                <el-form ref="search" :model="search" :rules="rules" :inline="true">
+                    <el-form-item label="">
+                        城市：<el-select v-model="search.city" placeholder="请选择城市" clearable filterable @clear="selectClear" @change="selectChange">
+                        <el-option v-for="(item,index) in citys" :key="index" :label="item.label" :value="item.value" /></el-select>
+                    </el-form-item>   
+                    <el-form-item label="">
+                        区域：<el-input v-model="search.property" style="width:200px" placeholder="请输入区域"></el-input>
+                    </el-form-item>
+                    <el-form-item label="" prop="startPrice">
+                        单价：<el-input v-model="search.startPrice" style="width:150px" placeholder="请输入最低单价" @change="handleStartPriceChange"></el-input> - 
+                    </el-form-item>
+                    <el-form-item label="" prop="endPrice">
+                        <el-input v-model="search.endPrice" style="width:150px" placeholder="请输入最高单价" @change="handleEndPriceChange"></el-input> 元/m2
+                    </el-form-item>            
+                    <el-form-item label="" prop="startTotal">
+                        总价：<el-input v-model="search.startTotal" style="width:150px" placeholder="请输入最低总价" @change="handleStartTotalChange"></el-input> - 
+                    </el-form-item>
+                    <el-form-item label="" prop="endTotal">
+                        <el-input v-model="search.endTotal" style="width:150px" placeholder="请输入最高总价" @change="handleEndTotalChange"></el-input> 万元/套
+                    </el-form-item>
+                    <el-form-item label="">               
+                        时间：<el-date-picker v-model="time" type="datetimerange" @change="changeTime" value-format="yyyy-MM-dd HH:mm:ss" 
+                        :default-time="['00:00:00', '23:59:59']" start-placeholder="开始日期" end-placeholder="结束日期"></el-date-picker>
+                    </el-form-item>   
+                    <el-form-item label="">
+                        <el-button type="primary" @click="tableDataInit(search);">搜索</el-button>
+                    </el-form-item>    
+                    <el-form-item label="">
+                        <el-button type="primary" @click="clearData">重置</el-button>
+                    </el-form-item>               
+                </el-form>
+            </div>
+        </div>
+        <component-table :data="tableData">
+        </component-table>
+    </div>
+</template>
+
+<script>
+import { getTableData } from '@/api/newHouse'
+
+export default {
+    name: "newHouse",
+    data () {
+        return {
+            show:false,
+            tableDataAll:null,
+            currentPage:1,
+            optionText:'',
+            time:[],
+            search:{
+                pageNum:1,//当前页
+                pageSize:10,//每页显示条数
+                city: '',
+                property:'',
+                price:'',
+                total:'',
+                time:'',
+                source:'',
+                startPrice:'',
+                endPrice:'',
+                startTotal:'',
+                endTotal:'',
+                property:'',
+                startTime:'',
+                endTime:'',
+            },        
+            citys:[],
+            rules: {
+                startPrice: [
+                    { validator: this.checkIsPositive, trigger: 'blur' },
+                    { validator: this.validateStartPrice, trigger: 'blur' },
+                ],
+                endPrice: [
+                    { validator: this.checkIsPositive, trigger: 'blur' },
+                    { validator: this.validateEndPrice, trigger: 'blur' },
+                ],
+                startTotal: [
+                    { validator: this.checkIsPositive, trigger: 'blur' },
+                    { validator: this.validateStartTotal, trigger: 'blur' },
+                ],
+                endTotal: [
+                    { validator: this.checkIsPositive, trigger: 'blur' },
+                    { validator: this.validateEndTotal, trigger: 'blur' },
+                ],
+            },
+            parentData:null,
+            visible:false,
+            tableData: {
+                loading:false,
+                border:true,
+                // 请求回来的数据
+                tableData:[],
+                // 列
+                tableLabel:[],
+                // 分页
+                page:{align:'right',currentChange:(currentPage) => {
+                    this.$nextTick(() => {
+                        this.search.pageNum = currentPage;
+                        this.tableDataInit(this.search);
+                    })
+                }},
+            },
+        }
+    },
+    created(){
+        this.labelInit();
+        this.initTimeLimit();
+        this.handleGetTableData();               
+    },
+    computed:{
+        codeList(){
+            return this.$store.state.code.codeList.codeList;
+        }
+    },
+    methods: {
+        handleGetTableData(loading=true){
+            loading && this.tableDataInit(this.search);
+        },
+        initTimeLimit(){
+            this.time = [this.getDayStartTime(),this.getDayEndTime()];
+            this.changeTime(this.time)
+        },
+        // 列初始化
+        labelInit(){
+            this.tableData.tableLabel = [
+                {type:'index',title:'序号',fixed:'left',width:60,align:'center'},
+                {prop:'city',title:'城市', width:200, tooltip:true},
+                {prop:'property',title:'区域', width:300, tooltip:true},
+                {prop:'price',title:'单价',width:200, tooltip:true},
+                {prop:'total',title:'价格',width:250, tooltip:true},
+                {prop:'time',title:'抓取时间',width:250, tooltip:true},
+                {prop:'source',title:'数据来源', tooltip:true}
+            ];
+        },
+        // 数据初始化
+        tableDataInit(search) {
+            this.tableData.loading = true;
+            this.request(getTableData,search,this,data => {
+                this.tableData.loading = false;
+                this.tableData.tableData = data.rows;
+                const res = this.codeList;
+                // 数据展示列code转换
+                for(var i=0,j=data.rows.length;i<j;i++){
+                    data.rows[i].city = this.getFilterCodeData(res,'CityName',data.rows[i].city);
+                    data.rows[i].source = this.getFilterCodeData(res,'DataSource',data.rows[i].source);
+                }
+                // 下拉框code转换
+                if(this.citys.length == 0 ){
+                    const cityName = this.getFilterCodeData(res,'CityName');
+                    for(var i=0,j=cityName.length;i<j;i++){
+                        var obj = {};
+                        this.$set(obj,"value",cityName[i].value);
+                        this.$set(obj,"label",cityName[i].name);
+                        this.citys.push(obj);
+                    }
+                }
+                this.tableData.page.total = data.totalRows;
+            },false);
+        },
+        changeTime(val){
+            if (val){
+                this.search.startTime = val[0];
+                this.search.endTime = val[1];
+            }else{
+                this.search.startTime = '';
+                this.search.endTime = '';
+            }
+        },
+        clearData(){
+            this.search.city = '';
+            this.search.property = '';
+            this.search.startPrice = '';
+            this.search.endPrice = '';
+            this.search.startTotal = '';
+            this.search.endTotal = '';
+            this.search.startTime = '';
+            this.search.endTime = '';
+            this.time = [];
+        },
+        selectClear() {
+            this.search.city = ''
+            this.$forceUpdate()
+        },
+        selectChange(val) {
+            this.search.city = val
+            this.$forceUpdate()
+        },
+        // 关联校验单价输入值
+        getFormData() {
+            const ret = {};
+            this.$refs.search.validate((valid) => {
+                ret.valid = valid;
+                ret.search = this.search;
+            });
+            return ret;
+        },
+        resetForm() {
+            this.$refs.search.resetFields();
+        },
+        handleStartPriceChange() {
+            this.$refs.search.validateField('endPrice');
+        },
+        handleEndPriceChange() {
+            this.$refs.search.validateField('startPrice');
+        },
+        validateStartPrice(rule, value, callback) {
+            const one = Number(value);
+            const endPrice = Number(this.search.endPrice);
+            if (!endPrice || one < endPrice) {
+                return callback();
+            }
+            return callback(new Error('输入值不得高于上限'));
+        },
+        validateEndPrice(rule, value, callback) {
+            const one = Number(value);
+            const startPrice = Number(this.search.startPrice);
+            if (!startPrice || one > startPrice) {
+                return callback();
+            }
+            return callback(new Error('输入值不得低于下限'));
+        },
+        handleStartTotalChange() {
+            this.$refs.search.validateField('endTotal');
+        },
+        handleEndTotalChange() {
+            this.$refs.search.validateField('startTotal');
+        },
+        validateStartTotal(rule, value, callback) {
+            const one = Number(value);
+            const endTotal = Number(this.search.endTotal);
+            if (!endTotal || one < endTotal) {
+                return callback();
+            }
+            return callback(new Error('输入值不得高于上限'));
+        },
+        validateEndPrice(rule, value, callback) {
+            const one = Number(value);
+            const startTotal = Number(this.search.startTotal);
+            if (!startTotal || one > startTotal) {
+                return callback();
+            }
+            return callback(new Error('输入值不得低于下限'));
+        },
+    },
+}
+</script>
+
+<style lang="css" scoped>
+
+</style>

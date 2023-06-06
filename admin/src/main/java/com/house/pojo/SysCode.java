@@ -1,0 +1,28 @@
+package com.house.pojo;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.io.Serializable;
+
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+public class SysCode implements Serializable {
+
+    private Integer id;
+
+    private String code;
+
+    private String desc;
+
+    private String name;
+
+    private String value;
+
+    private Integer number;
+
+}

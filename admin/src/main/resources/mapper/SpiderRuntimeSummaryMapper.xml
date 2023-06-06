@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SpiderRuntimeSummaryDao">
+  <resultMap id="BaseResultMap" type="com.house.pojo.SpiderRuntimeSummary">
+    <result column="id" jdbcType="BIGINT" property="id" />
+    <result column="method" jdbcType="VARCHAR" property="method" />
+    <result column="desc" jdbcType="VARCHAR" property="desc" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="update_time" jdbcType="VARCHAR" property="updateTime" />
+    <result column="time_range" jdbcType="VARCHAR" property="timeRange" />
+    <result column="type" jdbcType="VARCHAR" property="type" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.house.pojo.SpiderRuntimeSummary">
+    <result column="data" jdbcType="LONGVARBINARY" property="data" />
+  </resultMap>
+
+  <!--查询运行数据缓存-->
+  <select id="queryRuntimeSummary" resultType="com.house.vo.resp.RuntimeSummaryRespVo">
+  select `method`, `desc`, `data`, city, update_time, `type`, time_range from spider_runtime_summary
+   where SUBSTR(update_time,1,8) = DATE_FORMAT(NOW(),'%Y%m%d')
+      <if test="city != null and city != ''">
+          and city = #{city}
+      </if>
+      <if test="type != null and type != ''">
+          and type = #{type}
+      </if>
+      <if test="method != null and method != ''">
+          and method = #{method}
+      </if>
+      <if test="timeRange != null and timeRange != ''">
+          and time_range = #{timeRange}
+      </if>
+  </select>
+
+</mapper>

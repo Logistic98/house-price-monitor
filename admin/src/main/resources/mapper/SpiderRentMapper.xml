@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SpiderRentDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SpiderRent">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="date" jdbcType="VARCHAR" property="date" />
+    <result column="area" jdbcType="VARCHAR" property="area" />
+    <result column="descs" jdbcType="VARCHAR" property="descs" />
+    <result column="layout" jdbcType="VARCHAR" property="layout" />
+    <result column="size" jdbcType="VARCHAR" property="size" />
+    <result column="price" jdbcType="VARCHAR" property="price" />
+    <result column="district" jdbcType="VARCHAR" property="district" />
+    <result column="time" jdbcType="VARCHAR" property="time" />
+    <result column="source" jdbcType="VARCHAR" property="source" />
+  </resultMap>
+
+  <!--根据条件查询租房信息-->
+  <select id="queryRent" resultType="com.house.vo.resp.RentRespVo" parameterType="com.house.vo.req.RentReqVo">
+    select city, district, area, descs, layout,
+           case when `size` = '0' then '暂无数据' else concat(`size`, '平米') end `size`,
+           case when price = '0' then '暂无数据' else concat(price, '元/月') end price,
+           date_format(`time`,'%Y-%m-%d %H:%i:%S') time, `source`
+    from spider_rent
+    <where>
+      1 = 1
+      <if test="city != null and city != ''">
+        and city = #{city}
+      </if>
+      <if test="district != null and district != ''">
+        and instr(district,#{district}) > 0
+      </if>
+      <if test="area != null and area != ''">
+        and instr(area,#{area}) > 0
+      </if>
+      <if test="descs != null and descs != ''">
+        and instr(descs,#{descs}) > 0
+      </if>
+      <if test="layout != null and layout != ''">
+        and instr(layout,#{layout}) > 0
+      </if>
+      <if test="startTime != null and startTime != ''">
+        and date_format(`time`,'%Y-%m-%d %H:%i:%S')  >= #{startTime}
+      </if>
+      <if test="endTime != null and endTime != ''">
+        and date_format(`time`,'%Y-%m-%d %H:%i:%S')  &lt;= #{endTime}
+      </if>
+      <if test="startPrice != null and startPrice != ''">
+        and price >= #{startPrice} + 0
+      </if>
+      <if test="endPrice != null and endPrice != ''">
+        and price &lt;= #{endPrice} + 0
+      </if>
+      <if test="startSize != null and startSize != ''">
+        and `size` >= #{startSize} + 0
+      </if>
+      <if test="endSize != null and endSize != ''">
+        and `size` &lt;= #{endSize} + 0
+      </if>
+    </where>
+    order by `time` desc
+  </select>
+
+</mapper>

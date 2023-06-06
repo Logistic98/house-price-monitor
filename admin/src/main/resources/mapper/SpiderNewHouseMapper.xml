@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.SpiderNewHouseDao">
+
+  <resultMap id="BaseResultMap" type="com.house.pojo.SpiderNewHouse">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="date" jdbcType="VARCHAR" property="date" />
+    <result column="property" jdbcType="VARCHAR" property="property" />
+    <result column="price" jdbcType="VARCHAR" property="price" />
+    <result column="total" jdbcType="VARCHAR" property="total" />
+    <result column="time" jdbcType="VARCHAR" property="time" />
+    <result column="source" jdbcType="VARCHAR" property="source" />
+  </resultMap>
+
+  <!--根据条件查询新楼盘信息-->
+  <select id="queryNewHouse" resultType="com.house.vo.resp.NewHouseRespVo" parameterType="com.house.vo.req.NewHouseReqVo">
+    select city, property,
+           case when price = '0' then '价格待定' else concat(price, '元/m2') end price,
+           case when total = '0' then '暂无数据' else concat(total, '万/套') end total,
+           date_format(`time`,'%Y-%m-%d %H:%i:%S') time, `source`
+    from spider_new_house
+    <where>
+      1 = 1
+      <if test="city != null and city != ''">
+        and city = #{city}
+      </if>
+      <if test="startTime != null and startTime != ''">
+        and date_format(`time`,'%Y-%m-%d %H:%i:%S')  >= #{startTime}
+      </if>
+      <if test="endTime != null and endTime != ''">
+        and date_format(`time`,'%Y-%m-%d %H:%i:%S')  &lt;= #{endTime}
+      </if>
+      <if test="startPrice != null and startPrice != ''">
+        and price >= #{startPrice} + 0
+      </if>
+      <if test="endPrice != null and endPrice != ''">
+        and price &lt;= #{endPrice} + 0
+      </if>
+      <if test="startTotal != null and startTotal != ''">
+        and substring_index(total,'-',1)  >= #{startTotal} + 0
+      </if>
+      <if test="endTotal != null and endTotal != ''">
+        and substring_index(total,'-',-1) &lt;= #{endTotal} + 0
+      </if>
+      <if test="property != null and property != ''">
+        and instr(property,#{property}) > 0
+      </if>
+    </where>
+    order by `time` desc
+  </select>
+
+</mapper>

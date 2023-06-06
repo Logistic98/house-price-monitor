@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.house.dao.XxlJobLogDao">
+  <resultMap id="BaseResultMap" type="com.house.pojo.XxlJobLog">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="job_group" jdbcType="INTEGER" property="jobGroup" />
+    <result column="job_id" jdbcType="INTEGER" property="jobId" />
+    <result column="executor_address" jdbcType="VARCHAR" property="executorAddress" />
+    <result column="executor_handler" jdbcType="VARCHAR" property="executorHandler" />
+    <result column="executor_param" jdbcType="VARCHAR" property="executorParam" />
+    <result column="executor_sharding_param" jdbcType="VARCHAR" property="executorShardingParam" />
+    <result column="executor_fail_retry_count" jdbcType="INTEGER" property="executorFailRetryCount" />
+    <result column="trigger_time" jdbcType="TIMESTAMP" property="triggerTime" />
+    <result column="trigger_code" jdbcType="INTEGER" property="triggerCode" />
+    <result column="handle_time" jdbcType="TIMESTAMP" property="handleTime" />
+    <result column="handle_code" jdbcType="INTEGER" property="handleCode" />
+    <result column="alarm_status" jdbcType="TINYINT" property="alarmStatus" />
+    <result column="ignore" jdbcType="VARCHAR" property="ignore" />
+  </resultMap>
+  <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.house.pojo.XxlJobLog">
+    <result column="trigger_msg" jdbcType="LONGVARCHAR" property="triggerMsg" />
+    <result column="handle_msg" jdbcType="LONGVARCHAR" property="handleMsg" />
+  </resultMap>
+
+  <!--根据条件查询爬虫抓取情况的消息通知信息-->
+  <select id="queryXxlNewsPageInfo" resultType="com.house.vo.resp.XxlNewsPageRespVo" parameterType="com.house.vo.req.XxlNewsPageReqVo">
+    select id, date_format(`trigger_time`,'%Y-%m-%d %H:%i:%S') trigger_time,
+           date_format(`handle_time`,'%Y-%m-%d %H:%i:%S') handle_time,
+           trigger_code, trigger_msg, handle_code, handle_msg from xxl_job_log
+    where `ignore` is null
+    <if test="startTime != null and startTime != ''">
+      and date_format(`handle_time`,'%Y-%m-%d %H:%i:%S')  >= #{startTime}
+    </if>
+    <if test="endTime != null and endTime != ''">
+      and date_format(`handle_time`,'%Y-%m-%d %H:%i:%S')  &lt;= #{endTime}
+    </if>
+    <if test="triggerCode != null and triggerCode != ''">
+      and trigger_code = #{triggerCode}
+    </if>
+    <if test="handleCode != null and handleCode != ''">
+      and handle_code = #{handleCode}
+    </if>
+    order by handle_time desc
+  </select>
+
+  <!-- 删除日志（包括批量删除） -->
+  <delete id="batchDeleteNewsLog">
+    delete
+    from xxl_job_log
+    where id in
+    <foreach collection="list" open="(" close=")" separator="," item="item">
+      #{item}
+    </foreach>
+  </delete>
+
+</mapper>

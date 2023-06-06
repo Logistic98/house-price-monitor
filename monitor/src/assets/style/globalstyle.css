@@ -1,0 +1,7 @@
+/************************* 全局样式 *************************/
+.el-button+.el-button{
+    margin-left: 0;
+}
+#nprogress .bar {
+    background: #52bea6 !important; /* 进度条自定义颜色 */
+}
