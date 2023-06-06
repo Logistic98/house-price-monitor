@@ -24,15 +24,15 @@
 
 ### 1.2 项目技术栈
 
-后端部分：[Springboot](https://github.com/spring-projects/spring-boot)（后端核心框架）、[Mybatis](https://github.com/mybatis/mybatis-3)（持久化框架）、[Shiro](https://github.com/apache/shiro)（权限框架）、[Druid](https://github.com/alibaba/druid)（数据库连接池）、[Screw](https://github.com/pingfangushi/screw)（数据库表结构生成器）、[Swagger](https://github.com/swagger-api/swagger-ui)（接口文档）、[Hutool](https://github.com/looly/hutool)（Java工具类库）、[Lombok](https://www.projectlombok.org/)（简化代码）
+后端部分：[Springboot](https://github.com/spring-projects/spring-boot)（后端核心框架）、[Mybatis](https://github.com/mybatis/mybatis-3)（持久化框架）、[Shiro](https://github.com/apache/shiro)（权限框架）、[Druid](https://github.com/alibaba/druid)（数据库连接池）、[Screw](https://github.com/pingfangushi/screw)（数据库表结构生成器）、[Swagger](https://github.com/swagger-api/swagger-ui)（接口文档）、[Hutool](https://github.com/looly/hutool)（Java工具类库）、[Lombok](https://www.projectlombok.org/)（简化代码）、[MySQL](https://www.mysql.com/cn/)（数据库）、[Redis](https://redis.io/)（高速缓存）
 
 前端部分：[Vue](https://cn.vuejs.org/v2/guide/index.html)（前端核心框架）、[VueX](https://vuex.vuejs.org/zh/)（状态管理）、[axios](https://github.com/axios/axios)（HTTP请求库）、[Element-UI](https://element.eleme.cn/#/zh-CN/component/installation)（基础组件库）、[Echarts](https://echarts.baidu.com/theme-builder/)（可视化图表）
 
 爬虫部分：[Xpath](https://www.w3.org/TR/xpath/)（Python爬虫核心模块）、[ProxyPool](https://github.com/jhao104/proxy_pool)（Python爬虫IP代理池）
 
-定时任务：[xxl-job](https://github.com/xuxueli/xxl-job/)（分布式任务调度平台，分为调度中心和执行器两部分）
+定时任务：[xxl-job](https://github.com/xuxueli/xxl-job/)（分布式任务调度平台，分为调度中心 xxl-job-admin 和执行器 xxl-job-executor 两部分）
 
-开发环境：IDEA（含jrebel热部署插件）、PyCharm、VScode、Git、Maven、Navicat、MySQL、Redis
+开发工具：IDEA、PyCharm、VScode、Git、Maven、Navicat
 
 ### 1.3 项目结构
 
@@ -100,17 +100,17 @@ house-price-monitor
 
 统一说明：项目里以 .example 结尾的是含敏感信息替换文件，需要将配置信息换成自己的，并去掉这个结尾。这类文件具体有哪些见 .gitignore 。
 
-### 2.1 mysql及redis数据库
+### 2.1 MySQL及Redis环境
 
-项目使用的mysql版本是5.7，创建一个名为housedb的数据库。
+在服务器上部署MySQL及Redis环境。
+
+项目使用的MySQL版本是5.7，创建一个名为housedb的数据库。
 
 ```
 $ CREATE DATABASE housedb DEFAULT CHARSET=utf8 DEFAULT COLLATE utf8_unicode_ci;
 ```
 
 创建数据库用户并设置密码，执行public-doc目录下的housedb.sql初始化数据表。
-
-部署redis环境（建议部署在服务器上），教程详见：[VPS基本部署环境的搭建与配置](https://www.eula.club/VPS%E5%9F%BA%E6%9C%AC%E9%83%A8%E7%BD%B2%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE.html) 的6.3节
 
 ### 2.2 admin模块
 
@@ -147,7 +147,7 @@ $ pip install -r requirements.txt
 /spider/lib/spider/base_spider.py
 ```
 
-注：ProxyPool建议自建（不想折腾就用官方的），通过Docker直接部署，教程详见：[VPS基本部署环境的搭建与配置](https://www.eula.club/VPS%E5%9F%BA%E6%9C%AC%E9%83%A8%E7%BD%B2%E7%8E%AF%E5%A2%83%E7%9A%84%E6%90%AD%E5%BB%BA%E4%B8%8E%E9%85%8D%E7%BD%AE.html) 的8.2节。
+注：ProxyPool建议自建（不想折腾就用官方的），通过Docker直接部署，教程详见：[https://github.com/jhao104/proxy_pool](https://github.com/jhao104/proxy_pool)
 
 ### 2.5 xxl-job-admin模块
 
@@ -167,7 +167,7 @@ xxl-job的执行器模块，使用Maven拉取依赖，然后配置好以下文�
 /xxl-job-executor/src/main/resources/application.properties
 ```
 
-注：开发定时任务的话就在 XxlJobTimeTask.java 文件里写业务逻辑即可。xxl-job的打包部署教程见：[Springboot和一些主流框架的整合样例](https://www.eula.club/Springboot%E5%92%8C%E4%B8%80%E4%BA%9B%E4%B8%BB%E6%B5%81%E6%A1%86%E6%9E%B6%E7%9A%84%E6%95%B4%E5%90%88%E6%A0%B7%E4%BE%8B.html) 的2.6节。
+注：开发定时任务的话就在 XxlJobTimeTask.java 文件里写业务逻辑即可。
 
 ## 3. 项目截图
 
